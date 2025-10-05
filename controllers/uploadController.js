@@ -1,4 +1,3 @@
-import chromaCollectionPromise from "../config/chroma.js";
 import fs from 'fs';
 import path from 'path';
 
@@ -16,16 +15,17 @@ const addNewDocument = async (req, res) => {
     const cvNewFileName = `cv-${uuid}${path.extname(cvFile[0].originalname) || '.pdf'}`;
     const projectNewFileName = `pr-${uuid}${path.extname(projectFile[0].originalname) || '.pdf'}`;
 
-    const cvNewPath = path.join('files', cvNewFileName);
-    const projectNewPath = path.join('files', projectNewFileName);
+    const cvNewPath = path.join('uploads', cvNewFileName);
+    const projectNewPath = path.join('uploads', projectNewFileName);
 
     fs.renameSync(cvFile[0].path, cvNewPath);
     fs.renameSync(projectFile[0].path, projectNewPath);
 
-    res.json({ 
+    res.status(200).json({ 
       message: 'Documents added successfully',
       cv: cvNewFileName,
-      project_report: projectNewFileName
+      project_report: projectNewFileName,
+      uuid: uuid
     });
   } catch (error) {
     res.status(500).json({ 

@@ -1,16 +1,19 @@
 import express from 'express';
-import { addNewDocument } from './controllers/controller.js';
+import { addNewDocument } from '../controllers/uploadController.js';
+import { evaluateDocument } from '../controllers/evaluateController.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import multer from 'multer';
+import { printQueue } from '../controllers/queueController.js';
 
-const upload = multer({ dest: 'files/' })
+const upload = multer({ dest: 'uploads/' })
 const app = express();
 app.use(cors());
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
 app.use(helmet());
 app.use(morgan("combined"));
 
@@ -28,5 +31,14 @@ app.post(
 );
 
 app.post('/evaluate', (req, res) => {
-  res.send('Hello World!');
+  evaluateDocument(req, res);
+});
+
+app.get('/print-queue', (req, res) => {
+  try {
+    printQueue();
+    res.status(200).json({ message: 'Queue printed to console' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error printing queue', error: error.message });
+  }
 });

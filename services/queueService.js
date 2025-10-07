@@ -1,10 +1,7 @@
 import { Queue } from "bullmq";
-import dotenv from "dotenv";
 import { QueueEvents } from "bullmq";
 
-dotenv.config();
-
-
+const logSource = "queueService - "
 
 const jobQueue = new Queue('jobQueue', {
     connection: {
@@ -21,19 +18,19 @@ const queueEvents = new QueueEvents('jobQueue', {
 });
 
 queueEvents.on('waiting', ({ jobId }) => {
-    console.log(`Job ${jobId} is waiting to be processed`);
+    console.log(`${logSource} Job ${jobId} is waiting to be processed`);
 });
 
-queueEvents.on('active', ({ jobId, prev }) => {
-    console.log(`Job ${jobId} is now active; previous status was ${prev}`);
+queueEvents.on('active', ({ jobId, prev }) => {             
+    console.log(`${logSource} Job ${jobId} is now active; previous status was ${prev}`);
 });
 
 queueEvents.on('completed', ({ jobId, returnvalue }) => {
-    console.log(`Job ${jobId} has completed with return value: ${returnvalue}`);
+    console.log(`${logSource} Job ${jobId} has completed with return value: ${returnvalue}`);
 });
 
 queueEvents.on('failed', ({ jobId, failedReason }) => {
-    console.log(`Job ${jobId} has failed with reason: ${failedReason}`);
+    console.log(`${logSource} Job ${jobId} has failed with reason: ${failedReason}`);
 });
 
 export { jobQueue };

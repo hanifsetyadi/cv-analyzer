@@ -1,4 +1,7 @@
-import { addQueue } from "./queueController.js";
+import { addJob } from "./queueController.js";
+// import { addNewDocument } from "./chromaController.js";
+
+const logSource = "evaluateController - "
 
 const evaluateDocument = async (req, res) => {
     const { id, jobTitle } = req.body;
@@ -8,9 +11,10 @@ const evaluateDocument = async (req, res) => {
     }
 
     try {
-        await addQueue(id, jobTitle);
+        const jobID = await addJob(id, jobTitle);
+        
         res.status(200).json(
-            { "id" : id, 
+            { "id" : jobID, 
               "status": "queued"
             }
         );

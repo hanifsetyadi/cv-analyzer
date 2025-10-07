@@ -1,11 +1,11 @@
 import express from 'express';
-import { addNewDocument } from '../controllers/uploadController.js';
+import { uploadNewFiles } from '../controllers/uploadController.js';
 import { evaluateDocument } from '../controllers/evaluateController.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import multer from 'multer';
-import { printQueue } from '../controllers/queueController.js';
+import { printJob, getJobStatus } from '../controllers/queueController.js';
 
 const upload = multer({ dest: 'uploads/' })
 const app = express();
@@ -13,7 +13,6 @@ app.use(cors());
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
 app.use(helmet());
 app.use(morgan("combined"));
 
@@ -27,7 +26,7 @@ app.post(
     { name: 'cv', maxCount: 1 },
     { name: 'projectReport', maxCount: 1 }
   ]),
-  addNewDocument
+  uploadNewFiles
 );
 
 app.post('/evaluate', (req, res) => {
@@ -41,4 +40,8 @@ app.get('/print-queue', (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error printing queue', error: error.message });
   }
+});
+
+app.get('/result/:id', (req, res) => {
+  getJobStatus(req, res);
 });

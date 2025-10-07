@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const addNewDocument = async (req, res) => {
+const uploadNewFiles = async (req, res) => {
   try {
     const cvFile = req.files['cv'];
     const projectFile = req.files['projectReport'];
@@ -22,7 +22,7 @@ const addNewDocument = async (req, res) => {
     fs.renameSync(projectFile[0].path, projectNewPath);
 
     res.status(200).json({ 
-      message: 'Documents added successfully',
+      message: 'File uploaded successfully',
       cv: cvNewFileName,
       project_report: projectNewFileName,
       uuid: uuid
@@ -35,4 +35,4 @@ const addNewDocument = async (req, res) => {
   }
 };
 
-export { addNewDocument };
+export { uploadNewFiles };

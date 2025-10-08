@@ -106,7 +106,7 @@ async function getContext(collection, k = 2) {
 }
 
 const createPrompt = () => {
-  return PromptTemplate.fromTemplate(`Eval Product Engineer (Backend) candidate. Use rubrics strictly.
+  return PromptTemplate.fromTemplate(`Eval {jobTitle} candidate. Use rubrics strictly.
 
 RUBRICS:
 {context}

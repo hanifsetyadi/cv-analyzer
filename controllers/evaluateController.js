@@ -51,15 +51,10 @@ const parseDocumentPDFParser = async (fileName, res) => {
             cv: cvResult,
             project_report: prResult
         };
-        // console.log(`${logSource} Document parsed successfully with data: `, data);
         return data;
-
-        // return res.status(200).json(data);
     } catch (error) {
         console.error(`${logSource} Error parsing document:`, error);
-        // throw error;
-
-        return res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' });
+        throw error;
     }
 };
 

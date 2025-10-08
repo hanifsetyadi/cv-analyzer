@@ -25,8 +25,8 @@ queueEvents.on('active', ({ jobId, prev }) => {
     console.log(`${logSource} Job ${jobId} is now active; previous status was ${prev}`);
 });
 
-queueEvents.on('completed', ({ jobId, returnvalue }) => {
-    console.log(`${logSource} Job ${jobId} has completed with return value: ${returnvalue}`);
+queueEvents.on('completed', ({ jobId }) => {
+    console.log(`${logSource} Job ${jobId} has completed`);
 });
 
 queueEvents.on('failed', ({ jobId, failedReason }) => {

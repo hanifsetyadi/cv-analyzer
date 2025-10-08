@@ -33,30 +33,6 @@ app.post('/evaluate', (req, res) => {
   evaluateDocument(req, res);
 });
 
-app.get('/print-queue', (req, res) => {
-  try {
-    printQueue();
-    res.status(200).json({ message: 'Queue printed to console' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error printing queue', error: error.message });
-  }
-});
-
 app.get('/result/:id', (req, res) => {
   getJobStatus(req, res);
 });
-
-app.get('/parsed-doc', (req, res) => {
-  const fileName = req.query.fileName;
-  if (!fileName) {
-    return res.status(400).json({ error: 'fileName query parameter is required' });
-  }
-  // parseDocument(fileName, res)
-  parseDocumentPDFParser(fileName, res);
-})
-
-app.get('/', (req,res) => {
-  res.status(200).json({
-    message: "Mantap Lekku!"
-  })
-})

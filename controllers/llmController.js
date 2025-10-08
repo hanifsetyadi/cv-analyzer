@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
-// import { StringOutputParser } from '@langchain/core/output_parsers';
-import chromaCollectionPromise from './chromaService.js';
+import chromaCollectionPromise from '../services/chromaService.js';
 import { z } from "zod";
+
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 const ResponseFormatter = z.object({
   cv_match_rate: z.number().describe("Weighted average (0-1 decimal) based on four parameters — Technical Skills Match (backend, APIs, cloud, AI/LLM), Experience Level, Relevant Achievements, and Cultural/Collaboration Fit — reflecting how well the candidate's CV aligns with the Product Engineer (Backend) role."),
@@ -12,8 +13,6 @@ const ResponseFormatter = z.object({
   project_feedback: z.string().describe("Short feedback (1-2 sentences) summarizing project performance: how well prompt chaining, error handling, and documentation were executed, as well as code quality and innovation beyond base requirements."),
   overall_summary: z.string().describe("Concise summary (3-5 sentences) combining CV and project evaluations. Highlight technical strengths, growth areas, and overall recommendation for the Product Engineer (Backend) position — including readiness for AI-powered systems, prompt chaining, and RAG integration.")
 });
-
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 const embeddings = new GoogleGenerativeAIEmbeddings({
   apiKey: GOOGLE_API_KEY,
@@ -27,7 +26,6 @@ const llm = new ChatGoogleGenerativeAI({
   // maxOutputTokens: 800
 });
 
-// Condensed system documents - only essential info
 const SYSTEM_DOCS = [
   {
     id: 'rubric_cv',
@@ -83,10 +81,10 @@ async function syncSystemDocuments() {
       embeddings: embedResults
     });
 
-    console.log('✓ System docs synced successfully');
+    console.log('System docs synced successfully');
     return collection;
   } catch (error) {
-    console.error('❌ Sync error:', error.message);
+    console.error('Sync error:', error.message);
     throw error;
   }
 }
@@ -108,7 +106,7 @@ async function getContext(collection, k = 2) {
 }
 
 const createPrompt = () => {
-  return PromptTemplate.fromTemplate(`Eval Product Engineer candidate. Use rubrics strictly.
+  return PromptTemplate.fromTemplate(`Eval Product Engineer (Backend) candidate. Use rubrics strictly.
 
 RUBRICS:
 {context}
@@ -131,48 +129,45 @@ Rate using rubrics. Output ONLY valid JSON:
 Be concise. No markdown.`);
 };
 
-export async function evaluateCandidate(item) {
-  console.log('\n📊 Starting candidate evaluation...');
+async function evaluateCandidate(item, jobTitle) {
+  console.log('\n Starting candidate evaluation...');
   
   if (!item?.cv?.text || !item?.project_report?.text) {
     const error = new Error("Missing cv.text or project_report.text");
-    console.error('❌ Input validation failed:', error.message);
+    console.error('Input validation failed:', error.message);
     throw error;
   }
 
   try {
-    console.log('1️⃣ Syncing system documents...');
+    console.log('Syncing system documents...');
     const collection = await syncSystemDocuments();
 
-    console.log('2️⃣ Retrieving context...');
+    console.log('Retrieving context...');
     const context = await getContext(collection, 2);
 
-    console.log('3️⃣ Preparing inputs...');
-    // const cvText = item.cv.text.slice(0, 3000);
-    // const projectText = item.project_report.text.slice(0, 4000);
+    console.log('Preparing inputs...');
 
     const cvText = item.cv.text;
     const projectText = item.project_report.text;
     
-    console.log(`   CV: ${cvText.length} chars, Project: ${projectText.length} chars`);
+    console.log(`CV: ${cvText.length} chars, Project: ${projectText.length} chars`);
 
-    console.log('4️⃣ Creating prompt chain...');
+    console.log('Creating prompt chain...');
     const prompt = createPrompt();
     
-    console.log('5️⃣ Invoking LLM...');
+    console.log('Invoking LLM...');
     const chain = prompt.pipe(llm.withStructuredOutput(ResponseFormatter));
 
     const response = await chain.invoke({
       context,
       cv: cvText,
-      project: projectText
+      project: projectText,
+      jobTitle: jobTitle
     });
 
     console.log('\n✅ LLM Response received:');
     console.log('Raw response:', JSON.stringify(response, null, 2));
 
-
-    // Validate response
     if (!response.cv_match_rate && response.cv_match_rate !== 0) {
       console.warn('⚠️ cv_match_rate is undefined');
     }
@@ -182,7 +177,6 @@ export async function evaluateCandidate(item) {
 
     console.log('\n✅ Evaluation complete');
     return response;
-
   } catch (error) {
     console.error('\n❌ Evaluation failed:', error.message);
     console.error('Stack:', error.stack);
@@ -190,13 +184,4 @@ export async function evaluateCandidate(item) {
   }
 }
 
-// Health check
-export async function healthCheck() {
-  try {
-    const collection = await chromaCollectionPromise;
-    const count = await collection.count();
-    return { status: 'ok', docs: count };
-  } catch (error) {
-    return { status: 'error', message: error.message };
-  }
-}
+export { evaluateCandidate }

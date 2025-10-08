@@ -1,13 +1,16 @@
 import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
+import { parseDocumentPDFParser } from '../controllers/evaluateController.js';
+import { evaluateCandidate } from '../services/llmService.js';
 
 const connection = new IORedis({ maxRetriesPerRequest: null });
 
 const worker = new Worker('jobQueue', async job => {
     console.log(`Processing job ID: ${job.id}, Title: ${job.data.jobTitle}`);
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    const items = await parseDocumentPDFParser(job.data.id);
+    const result = await evaluateCandidate(items);
     console.log(`Completed job ID: ${job.id}`);
-    return { result: 'success' };
+    return { result: result };
 }, { connection });
 
 worker.on('completed', (job, returnvalue) => {

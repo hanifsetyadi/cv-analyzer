@@ -1,11 +1,11 @@
 import express from 'express';
 import { uploadNewFiles } from '../controllers/uploadController.js';
-import { evaluateDocument } from '../controllers/evaluateController.js';
+import { evaluateDocument, parseDocumentPDFParser } from '../controllers/evaluateController.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import multer from 'multer';
-import { printJob, getJobStatus } from '../controllers/queueController.js';
+import { getJobStatus } from '../controllers/queueController.js';
 
 const upload = multer({ dest: 'uploads/' })
 const app = express();
@@ -45,3 +45,12 @@ app.get('/print-queue', (req, res) => {
 app.get('/result/:id', (req, res) => {
   getJobStatus(req, res);
 });
+
+app.get('/parsed-doc', (req, res) => {
+  const fileName = req.query.fileName;
+  if (!fileName) {
+    return res.status(400).json({ error: 'fileName query parameter is required' });
+  }
+  // parseDocument(fileName, res)
+  parseDocumentPDFParser(fileName, res);
+})

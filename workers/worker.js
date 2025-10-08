@@ -3,6 +3,7 @@ import IORedis from 'ioredis';
 import { parseDocumentPDFParser } from '../controllers/evaluateController.js';
 import { evaluateCandidate } from '../services/llmService.js';
 
+
 const connection = new IORedis({ maxRetriesPerRequest: null });
 
 const worker = new Worker('jobQueue', async job => {

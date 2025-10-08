@@ -1,6 +1,6 @@
-import { addJob } from "./queueController.js";
 import { PDFParse } from "pdf-parse";
-import { readFile } from 'node:fs/promises'
+import { addJob } from "./queueController.js";
+import { readFile } from 'node:fs/promises';
 
 const logSource = "evaluateController - "
 
@@ -62,5 +62,6 @@ const parseDocumentPDFParser = async (fileName, res) => {
         return res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' });
     }
 };
+
 
 export { evaluateDocument, parseDocumentPDFParser};

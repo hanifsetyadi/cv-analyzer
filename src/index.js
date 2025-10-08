@@ -54,3 +54,9 @@ app.get('/parsed-doc', (req, res) => {
   // parseDocument(fileName, res)
   parseDocumentPDFParser(fileName, res);
 })
+
+app.get('/', (req,res) => {
+  res.status(200).json({
+    message: "Mantap Lekku!"
+  })
+})

@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import multer from 'multer';
 import { getJobStatus } from '../controllers/queueController.js';
+import { addNewRubric } from '../controllers/llmController.js';
 
 const upload = multer({ dest: 'uploads/' })
 const app = express();
@@ -36,3 +37,7 @@ app.post('/evaluate', (req, res) => {
 app.get('/result/:id', (req, res) => {
   getJobStatus(req, res);
 });
+
+app.post('/addrubric', (req, res) => {
+  addNewRubric(req, res)
+})

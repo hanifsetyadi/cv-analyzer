@@ -36,20 +36,20 @@ const parseDocumentPDFParser = async (fileName, res) => {
         }
 
         const cv_filePath = `uploads/cv-${fileName}.pdf`;
-        const pr_filePath = `uploads/pr-${fileName}.pdf`;
+        // const pr_filePath = `uploads/pr-${fileName}.pdf`;
 
         const bufferCV = await readFile(cv_filePath);
-        const bufferPR = await readFile(pr_filePath);
+        // const bufferPR = await readFile(pr_filePath);
 
         const cvData = new PDFParse({data: bufferCV});
-        const prData = new PDFParse({data: bufferPR});
+        // const prData = new PDFParse({data: bufferPR});
 
         const cvResult = await cvData.getText();
-        const prResult = await prData.getText();
+        // const prResult = await prData.getText();
 
         const data = {
             cv: cvResult,
-            project_report: prResult
+            // project_report: prResult
         };
         return data;
     } catch (error) {

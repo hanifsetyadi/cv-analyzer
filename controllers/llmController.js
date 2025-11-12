@@ -21,6 +21,7 @@ export async function addNewRubric(req, res) {
   const jobTitle = req.body.jobTitle
   const cvContent = req.body.cvContent
   const jobDescription = req.body.jobDescription
+  const projectReportContent = req.body.projectReport
 
   const collection = await chromaCollectionPromise;
 
@@ -34,7 +35,12 @@ export async function addNewRubric(req, res) {
       id: `job_desc_${jobTitle}`,
       content: jobDescription,
       metadata: { type: 'job_desc' }
-    }
+    },
+    {
+      id: `rubnric_project_${jobTitle}`,
+      content: projectReportContent,
+      metadata: { type: 'rubric_project' }
+    },
   ]
 
   const existing = await collection.get({ ids: [`rubric_cv_${jobTitle}`] });
@@ -105,7 +111,6 @@ async function getContext(collection, k = 2, jobTitle, maxRetries = 3, delayMs =
   }
 }
 
-
 const createPrompt = () => {
   return PromptTemplate.fromTemplate(`Eval {jobTitle} candidate. Use rubrics strictly.
 
@@ -119,6 +124,8 @@ Rate using rubrics. Output ONLY valid JSON:
 {{
   "cv_match_rate": <0-1, 2 decimals>,
   "cv_feedback": "<key strengths/gaps, 50 words max>",
+  "project_score": <0-1, 2 decimals>,
+  "project_feedback": "<key strengths/gaps, 50 words max>",
   "overall_summary": "<hire recommendation, 50 words max>"
 }}
 
@@ -128,7 +135,10 @@ Be concise. No markdown.`);
 async function evaluateCandidate(item, jobTitle) {
   console.log('Starting candidate evaluation...');
 
-  if (!item?.cv?.text || !item?.project_report?.text) {
+  if (
+    !item?.cv?.text 
+    || !item?.project_report?.text
+  ) {
     const error = new Error("Missing cv.text or project_report.text");
     console.error('Input validation failed:', error.message);
     throw error;
@@ -182,6 +192,8 @@ async function evaluateCandidate(item, jobTitle) {
 const ResponseFormatter = z.object({
   cv_match_rate: z.number().describe("Weighted average (0-1 decimal)  Experience Level, Relevant Achievements, and Cultural/Collaboration Fit, reflecting how well the candidate's CV aligns with the role."),
   cv_feedback: z.string().describe("Brief narrative (1-2 sentences) summarizing the candidate's CV strengths and weaknesses in relation to the job description and collaboration potential. Should mention gaps or highlights relevant to the job description."),
+  project_score: z.number().describe("Score (0-1 decimal) reflecting the quality and relevance of the candidate's project work in relation to the job description."),
+  project_feedback: z.string().describe("Concise feedback (1-2 sentences) on the candidate's project work, highlighting strengths and areas for improvement relevant to the job description."),
   overall_summary: z.string().describe("Concise summary (3-5 sentences) combining CV. Highlight technical strengths, growth areas, and overall recommendation for the role")
 });
 

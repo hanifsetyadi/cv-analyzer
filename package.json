@@ -8,6 +8,8 @@
     "worker": "node ./workers/worker.js"
   },
   "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
+    "@chroma-core/google-gemini": "^0.1.7",
     "@docling/docling-core": "^0.0.7",
     "@langchain/community": "^0.3.57",
     "@langchain/core": "^0.3.58",

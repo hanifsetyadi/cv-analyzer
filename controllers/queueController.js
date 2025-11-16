@@ -54,10 +54,10 @@ const getJobStatus = async (req, res) => {
     if (!job) {
       const doc = await getDocument(id)
 
-      if (!doc.exists) {
+      if (!doc || typeof doc.exists === "undefined" || doc.exists === false) {
         return res.status(404).json({
           error: 'Job not found',
-          message: 'Job ID does not exist in queue or database'
+          message: 'Job ID does not exist'
         });
       }
 

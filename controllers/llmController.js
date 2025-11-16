@@ -37,7 +37,7 @@ export async function addNewRubric(req, res) {
       metadata: { type: 'job_desc' }
     },
     {
-      id: `rubnric_project_${jobTitle}`,
+      id: `rubric_project_${jobTitle}`,
       content: projectReportContent,
       metadata: { type: 'rubric_project' }
     },
@@ -120,13 +120,16 @@ RUBRICS:
 CV:
 {cv}
 
+PROJECT:
+{project}
+
 Rate using rubrics. Output ONLY valid JSON:
 {{
   "cv_match_rate": <0-1, 2 decimals>,
   "cv_feedback": "<key strengths/gaps, 50 words max>",
-  "project_score": <0-1, 2 decimals>,
-  "project_feedback": "<key strengths/gaps, 50 words max>",
-  "overall_summary": "<hire recommendation, 50 words max>"
+  "project_score": <1-5, 1 decimal>,
+  "project_feedback": "<main findings, 50 words max>",
+  "overall_summary": "<hire recommendation, 40 words max>"
 }}
 
 Be concise. No markdown.`);
@@ -162,6 +165,7 @@ async function evaluateCandidate(item, jobTitle) {
 
     console.log('Invoking LLM...');
     const chain = prompt.pipe(llm.withStructuredOutput(ResponseFormatter));
+    console.log("prompt success");
 
     const response = await chain.invoke({
       context,
@@ -189,12 +193,20 @@ async function evaluateCandidate(item, jobTitle) {
   }
 }
 
+// const ResponseFormatter = z.object({
+//   cv_match_rate: z.number().describe("Weighted average (0-1 decimal)  Experience Level, Relevant Achievements, and Cultural/Collaboration Fit, reflecting how well the candidate's CV aligns with the role."),
+//   cv_feedback: z.string().describe("Brief narrative (1-2 sentences) summarizing the candidate's CV strengths and weaknesses in relation to the job description and collaboration potential. Should mention gaps or highlights relevant to the job description."),
+//   project_score: z.number().describe("Score (0-1 decimal) reflecting the quality and relevance of the candidate's project work in relation to the job description."),
+//   project_feedback: z.string().describe("Concise feedback (1-2 sentences) on the candidate's project work, highlighting strengths and areas for improvement relevant to the job description."),
+//   overall_summary: z.string().describe("Concise summary (3-5 sentences) combining CV. Highlight technical strengths, growth areas, and overall recommendation for the role")
+// });
+
 const ResponseFormatter = z.object({
-  cv_match_rate: z.number().describe("Weighted average (0-1 decimal)  Experience Level, Relevant Achievements, and Cultural/Collaboration Fit, reflecting how well the candidate's CV aligns with the role."),
-  cv_feedback: z.string().describe("Brief narrative (1-2 sentences) summarizing the candidate's CV strengths and weaknesses in relation to the job description and collaboration potential. Should mention gaps or highlights relevant to the job description."),
-  project_score: z.number().describe("Score (0-1 decimal) reflecting the quality and relevance of the candidate's project work in relation to the job description."),
-  project_feedback: z.string().describe("Concise feedback (1-2 sentences) on the candidate's project work, highlighting strengths and areas for improvement relevant to the job description."),
-  overall_summary: z.string().describe("Concise summary (3-5 sentences) combining CV. Highlight technical strengths, growth areas, and overall recommendation for the role")
+  cv_match_rate: z.number().describe("Weighted average (0-1 decimal) based on four parameters — Technical Skills Match (backend, APIs, cloud, AI/LLM), Experience Level, Relevant Achievements, and Cultural/Collaboration Fit — reflecting how well the candidate's CV aligns with the Product Engineer (Backend) role."),
+  cv_feedback: z.string().describe("Brief narrative (1-2 sentences) summarizing the candidate's CV strengths and weaknesses in relation to backend engineering, AI integration, and collaboration potential. Should mention gaps or highlights relevant to the job description."),
+  project_score: z.number().describe("Average score (1-5 scale) derived from five parameters — Correctness (prompt chaining, LLM integration, RAG context), Code Quality & Structure, Resilience & Error Handling, Documentation & Explanation, and Creativity/Bonus — showing overall project delivery quality."),
+  project_feedback: z.string().describe("Short feedback (1-2 sentences) summarizing project performance: how well prompt chaining, error handling, and documentation were executed, as well as code quality and innovation beyond base requirements."),
+  overall_summary: z.string().describe("Concise summary (3-5 sentences) combining CV and project evaluations. Highlight technical strengths, growth areas, and overall recommendation for the Product Engineer (Backend) position — including readiness for AI-powered systems, prompt chaining, and RAG integration.")
 });
 
 export { evaluateCandidate }

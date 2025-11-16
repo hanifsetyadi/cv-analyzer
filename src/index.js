@@ -1,6 +1,6 @@
 import express from 'express';
 import { uploadNewFiles } from '../controllers/uploadController.js';
-import { evaluateDocument, parseDocumentPDFParser } from '../controllers/evaluateController.js';
+import { evaluateDocument } from '../controllers/evaluateController.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';

@@ -13,17 +13,19 @@ const evaluateDocument = async (req, res) => {
 
     try {
         const jobID = await addJob(id, jobTitle);
-        
+
         res.status(200).json(
-            { "id" : jobID, 
-              "status": "queued"
+            {
+                "id": jobID,
+                "status": "queued"
             }
         );
     } catch (error) {
         res.status(500).json(
-            { "id" : id,
-              "status": "error",
-              "message": error.message
+            {
+                "id": id,
+                "status": "error",
+                "message": error.message
             }
         );
     }
@@ -41,8 +43,8 @@ const parseDocumentPDFParser = async (fileName, res) => {
         const bufferCV = await readFile(cv_filePath);
         const bufferPR = await readFile(pr_filePath);
 
-        const cvData = new PDFParse({data: bufferCV});
-        const prData = new PDFParse({data: bufferPR});
+        const cvData = new PDFParse({ data: bufferCV });
+        const prData = new PDFParse({ data: bufferPR });
 
         const cvResult = await cvData.getText();
         const prResult = await prData.getText();
@@ -58,5 +60,4 @@ const parseDocumentPDFParser = async (fileName, res) => {
     }
 };
 
-
-export { evaluateDocument, parseDocumentPDFParser};
+export { evaluateDocument, parseDocumentPDFParser };
